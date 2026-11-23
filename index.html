@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Говорушка</title>
+<meta name="description" content="Логопедические игры на автоматизацию и дифференциацию звуков">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Говорушка">
+<meta name="theme-color" content="#fff7ec">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{
+  --bg:#fff7ec; --card:#ffffff; --ink:#2b2340; --muted:#7b7290;
+  --accent:#ff7a59; --accent2:#5b8cff; --good:#2fbf71; --bad:#ff5b6e;
+  --sun:#ffd84d; --mint:#c9f2df; --sky:#dce8ff; --peach:#ffe1d6; --lilac:#ece0ff;
+  --shadow:0 6px 0 rgba(43,35,64,.12), 0 10px 24px rgba(43,35,64,.08);
+  --r:28px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1d1a2b; --card:#2a2640; --ink:#f4efff; --muted:#a9a0c4;
+    --mint:#21473a; --sky:#26365e; --peach:#4a2c2a; --lilac:#3a2d5a;
+    --shadow:0 6px 0 rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1d1a2b; --card:#2a2640; --ink:#f4efff; --muted:#a9a0c4;
+  --mint:#21473a; --sky:#26365e; --peach:#4a2c2a; --lilac:#3a2d5a;
+  --shadow:0 6px 0 rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:-apple-system,"SF Pro Rounded","Nunito",system-ui,sans-serif;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  touch-action:manipulation; overflow:hidden;
+}
+#app{height:100dvh;display:flex;flex-direction:column;
+  padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.btn{background:var(--card);border-radius:20px;padding:14px 22px;font-weight:700;font-size:20px;box-shadow:var(--shadow);transition:transform .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(43,35,64,.12)}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.good{background:var(--good);color:#fff}
+.btn.blue{background:var(--accent2);color:#fff}
+.icon-btn{width:56px;height:56px;border-radius:18px;font-size:26px;display:grid;place-items:center;background:var(--card);box-shadow:var(--shadow)}
+.icon-btn:active{transform:translateY(4px)}
+
+/* header */
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.top h1{margin:0;font-size:28px;flex:1}
+.top .title{flex:1;font-size:24px;font-weight:800}
+.progress{flex:1;height:18px;background:var(--card);border-radius:10px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.08)}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--sun),var(--accent));border-radius:10px;transition:width .3s}
+.stars{font-weight:800;font-size:22px;min-width:70px;text-align:right}
+
+/* home */
+.home{flex:1;overflow:auto;display:flex;flex-direction:column;gap:18px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand .logo{font-size:52px}
+.brand h1{font-size:34px;margin:0}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:17px}
+.label{font-weight:800;color:var(--muted);font-size:15px;text-transform:uppercase;letter-spacing:.06em;margin:4px 0 -6px}
+.sounds{display:flex;gap:12px;flex-wrap:wrap}
+.sound{width:84px;height:84px;border-radius:24px;font-size:40px;font-weight:900;background:var(--card);box-shadow:var(--shadow)}
+.sound.on{background:var(--accent);color:#fff}
+.sound.soon{opacity:.35}
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.game{border-radius:var(--r);padding:22px;text-align:left;box-shadow:var(--shadow);min-height:170px;display:flex;flex-direction:column;gap:6px}
+.game .e{font-size:54px}
+.game b{font-size:23px}
+.game span{color:var(--muted);font-size:16px;line-height:1.3}
+.game:active{transform:translateY(4px)}
+
+/* play area */
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;min-height:0;position:relative}
+.card{background:var(--card);border-radius:36px;box-shadow:var(--shadow);padding:24px 40px;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:280px}
+.card .pic{font-size:min(30vh,200px);line-height:1.1}
+.card .word{font-size:44px;font-weight:800;letter-spacing:.02em}
+.word .hl{color:var(--accent)}
+.word.hidden{visibility:hidden}
+.row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.chips{display:flex;gap:8px;background:var(--card);padding:6px;border-radius:18px;box-shadow:var(--shadow)}
+.chip{padding:10px 14px;border-radius:13px;font-weight:700;font-size:16px}
+.chip.on{background:var(--accent2);color:#fff}
+.pop{animation:pop .35s ease}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-12px)}40%,80%{transform:translateX(12px)}}
+.timer{height:8px;width:280px;background:var(--card);border-radius:6px;overflow:hidden}
+.timer i{display:block;height:100%;background:var(--accent2);width:100%}
+
+/* position game */
+.train{display:flex;gap:14px}
+.wagon{width:min(26vw,190px);height:130px;border-radius:26px;background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-weight:800;font-size:20px}
+.wagon .sch{display:flex;gap:6px}
+.wagon .sch i{width:22px;height:22px;border-radius:7px;background:var(--sky)}
+.wagon .sch i.f{background:var(--accent)}
+.wagon.ok{background:var(--good);color:#fff}
+.wagon.no{background:var(--bad);color:#fff}
+
+/* basket game */
+.field{flex:1;width:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;align-content:center;max-width:900px}
+.item{background:var(--card);border-radius:24px;box-shadow:var(--shadow);aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:62px;touch-action:none;position:relative}
+.item small{font-size:17px;font-weight:700;margin-top:2px}
+.item.gone{visibility:hidden}
+.item.drag{position:fixed;z-index:50;pointer-events:none;transform:scale(1.1);box-shadow:0 16px 40px rgba(0,0,0,.25)}
+.basket{width:100%;max-width:900px;min-height:120px;border-radius:32px;border:4px dashed var(--accent);background:var(--peach);display:flex;align-items:center;gap:6px;padding:10px 18px;flex-wrap:wrap;transition:transform .15s}
+.basket .bk{font-size:56px}
+.basket .got{font-size:40px}
+.basket.hot{transform:scale(1.03);background:var(--sun)}
+
+/* sort game */
+.houses{display:flex;gap:28px;margin-top:30px}
+.house{width:min(36vw,230px);height:190px;border-radius:30px 30px 24px 24px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:88px;font-weight:900;position:relative}
+.house:before{content:"";position:absolute;top:-34px;left:50%;transform:translateX(-50%);border-left:70px solid transparent;border-right:70px solid transparent;border-bottom:40px solid currentColor;opacity:.25}
+.house.ok{outline:6px solid var(--good)}
+.house.no{outline:6px solid var(--bad)}
+
+/* finish */
+.finish{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}
+.finish .big{font-size:120px}
+.finish h2{font-size:40px;margin:0}
+.finish p{font-size:22px;color:var(--muted);margin:0}
+.confetti{position:fixed;top:-60px;font-size:36px;pointer-events:none;animation:fall linear forwards;z-index:99}
+@keyframes fall{to{transform:translateY(115vh) rotate(540deg)}}
+
+/* settings */
+.sheet{position:fixed;inset:0;background:rgba(20,15,35,.45);display:flex;align-items:center;justify-content:center;z-index:80;padding:16px}
+.sheet .box{background:var(--bg);border-radius:30px;padding:26px;width:min(520px,100%);display:flex;flex-direction:column;gap:16px;max-height:90dvh;overflow:auto}
+.sheet h2{margin:0}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:19px;font-weight:600}
+.toggle{width:64px;height:38px;border-radius:20px;background:var(--muted);position:relative;transition:.2s}
+.toggle:after{content:"";position:absolute;top:4px;left:4px;width:30px;height:30px;border-radius:50%;background:#fff;transition:.2s}
+.toggle.on{background:var(--good)}
+.toggle.on:after{left:30px}
+.hint{color:var(--muted);font-size:15px;margin:0}
+@media (max-width:640px){
+  .card .word{font-size:32px}
+  .wagon{height:110px;font-size:16px}
+  .house{height:150px;font-size:64px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+/* ---------- Словарь: [слово, картинка]. Позиция звука считается автоматически ---------- */
+const WORDS = {
+  "Р": [["рыба","🐟"],["рак","🦞"],["ракета","🚀"],["рот","👄"],["роза","🌹"],["ручка","🖊️"],["рука","✋"],["радуга","🌈"],["ромашка","🌼"],["робот","🤖"],
+        ["корова","🐄"],["баран","🐏"],["гора","⛰️"],["морковь","🥕"],["корона","👑"],["барабан","🥁"],["пирог","🥧"],["жираф","🦒"],["ведро","🪣"],
+        ["сыр","🧀"],["топор","🪓"],["шар","🎈"],["комар","🦟"],["мухомор","🍄"],["помидор","🍅"],["повар","🧑‍🍳"],["тигр","🐅"]],
+  "Л": [["лук","🧅"],["лодка","🛶"],["лампа","💡"],["ложка","🥄"],["лошадь","🐴"],["лапа","🐾"],["луна","🌙"],
+        ["белка","🐿️"],["пчела","🐝"],["яблоко","🍎"],["голубь","🕊️"],["волк","🐺"],["молния","⚡"],["палатка","⛺"],["вилка","🍴"],
+        ["стул","🪑"],["футбол","⚽"],["козёл","🐐"],["орёл","🦅"],["ангел","👼"]],
+  "С": [["сок","🧃"],["сова","🦉"],["собака","🐕"],["самолёт","✈️"],["сумка","👜"],["суп","🍲"],["сапоги","👢"],["санки","🛷"],["сыр","🧀"],
+        ["лиса","🦊"],["маска","🎭"],["носки","🧦"],["капуста","🥬"],["бусы","📿"],["весы","⚖️"],
+        ["нос","👃"],["автобус","🚌"],["ананас","🍍"],["кактус","🌵"],["глобус","🌍"],["компас","🧭"]],
+  "Ш": [["шляпа","👒"],["шарф","🧣"],["шоколад","🍫"],["шар","🎈"],["шахматы","♟️"],["шорты","🩳"],
+        ["кошка","🐈"],["мишка","🧸"],["машина","🚗"],["каша","🥣"],["груша","🍐"],["вишня","🍒"],["бабушка","👵"],["ромашка","🌼"],["лошадь","🐴"],["ракушка","🐚"],
+        ["малыш","👶"],["мышь","🐭"],["карандаш","✏️"],["душ","🚿"]]
+};
+const FILLERS = [["дом","🏠"],["кит","🐋"],["утка","🦆"],["банан","🍌"],["дыня","🍈"],["тыква","🎃"],["яйцо","🥚"],["зонт","☂️"],["ёжик","🦔"],["панда","🐼"],["кубик","🎲"],["ключ","🔑"],["торт","🎂"],["гитара","🎸"],["пингвин","🐧"],["нота","🎵"]];
+const ALL_SOUNDS = ["Р","Л","С","Ш","Ж","З","Ч","Щ","Рь","Ль","Сь","Зь"];
+const PAIRS = {"Р":["Р","Л"],"Л":["Р","Л"],"С":["С","Ш"],"Ш":["С","Ш"]};
+const POS = ["начало","середина","конец"];
+
+/* ---------- Утилиты ---------- */
+const $ = (h)=>{const t=document.createElement("template");t.innerHTML=h.trim();return t.content.firstChild};
+const shuffle = a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const has = (w,s)=>w.includes(s.toLowerCase());
+const count = (w,s)=>w.split(s.toLowerCase()).length-1;
+function posOf(w,s){
+  const i=w.indexOf(s.toLowerCase()); const end=w.replace(/ь$/,"").length-1;
+  return i===0?0:(i===end?2:1);
+}
+function hl(w,s){ // выделить звук в слове
+  const l=s.toLowerCase(); return w.split("").map(c=>c===l?`<span class="hl">${c}</span>`:c).join("");
+}
+const store={
+  get(k,d){try{const v=localStorage.getItem("gv_"+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("gv_"+k,JSON.stringify(v))}catch(e){}}
+};
+const S = {
+  sound: store.get("sound","Р"), showWords: store.get("showWords",true),
+  voice: store.get("voice",true), sfx: store.get("sfx",true), rounds: store.get("rounds",10)
+};
+function save(){for(const k in S)store.set(k,S[k])}
+
+/* ---------- Голос и звуки ---------- */
+let ruVoice=null;
+function pickVoice(){
+  const v=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.startsWith("ru"));
+  ruVoice=v.find(x=>/milena|милена/i.test(x.name))||v.find(x=>x.localService)||v[0]||null;
+}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function say(t){
+  if(!S.voice||!("speechSynthesis" in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t); u.lang="ru-RU"; u.rate=.85; u.pitch=1.1;
+  if(ruVoice)u.voice=ruVoice; speechSynthesis.speak(u);
+}
+let ac=null;
+function tone(freqs,dur=.12,type="sine"){
+  if(!S.sfx)return;
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    freqs.forEach((f,i)=>{
+      const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+i*dur;
+      o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);
+      g.gain.exponentialRampToValueAtTime(.25,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+dur*1.6);
+      o.connect(g).connect(ac.destination);o.start(t);o.stop(t+dur*1.8);
+    });
+  }catch(e){}
+}
+const good=()=>tone([660,880,1100]);
+const bad=()=>tone([300,220],.16,"triangle");
+const PRAISE=["Молодец!","Отлично!","Здорово!","Умница!","Супер!","Так держать!"];
+const praise=()=>PRAISE[Math.random()*PRAISE.length|0];
+
+/* ---------- Каркас ---------- */
+const app=document.getElementById("app");
+let cleanup=null;
+function screen(node){ if(cleanup){cleanup();cleanup=null} app.innerHTML=""; app.appendChild(node); }
+function header(title, onBack){
+  const h=$(`<div class="top"><button class="icon-btn" aria-label="Назад">←</button><div class="title">${title}</div><div class="stars">⭐ <span>0</span></div></div>`);
+  h.querySelector("button").onclick=onBack||home;
+  return h;
+}
+function progressHeader(title){
+  const h=$(`<div class="top"><button class="icon-btn" aria-label="В меню">←</button><div class="progress"><i style="width:0%"></i></div><div class="stars">⭐ <span>0</span></div></div>`);
+  h.querySelector("button").onclick=home;
+  return {el:h,set(done,total,stars){h.querySelector("i").style.width=(done/total*100)+"%";h.querySelector(".stars span").textContent=stars}};
+}
+
+/* ---------- Главный экран ---------- */
+const GAMES=[
+  {id:"name", e:"🗣️", t:"Назови картинку", d:"Картинки появляются одна за другой — ребёнок называет их", bg:"var(--sky)"},
+  {id:"basket", e:"🧺", t:"Собери корзинку", d:"Положить в корзину только то, где есть звук", bg:"var(--peach)"},
+  {id:"pos", e:"🚂", t:"Где живёт звук?", d:"В начале, в середине или в конце слова", bg:"var(--mint)"},
+  {id:"sort", e:"🏠", t:"Чей домик?", d:"Различаем похожие звуки: Р–Л, С–Ш", bg:"var(--lilac)"}
+];
+function home(){
+  const el=$(`<div class="home">
+    <div class="brand"><div class="logo">🦉</div><div style="flex:1"><h1>Говорушка</h1><p>Игры на звуки для занятий с логопедом</p></div>
+      <button class="icon-btn" aria-label="Настройки">⚙️</button></div>
+    <div class="label">Звук</div>
+    <div class="sounds"></div>
+    <div class="label">Игры</div>
+    <div class="games"></div>
+  </div>`);
+  const sb=el.querySelector(".sounds");
+  ALL_SOUNDS.forEach(s=>{
+    const ok=!!WORDS[s];
+    const b=$(`<button class="sound ${s===S.sound?"on":""} ${ok?"":"soon"}">${s}</button>`);
+    b.onclick=()=>{ if(!ok){say("Этот звук скоро появится");return} S.sound=s;save();home();say("Звук "+s); };
+    sb.appendChild(b);
+  });
+  const gb=el.querySelector(".games");
+  GAMES.forEach(g=>{
+    const b=$(`<button class="game" style="background:${g.bg}"><div class="e">${g.e}</div><b>${g.t}</b><span>${g.d}</span></button>`);
+    b.onclick=()=>({name:gameName,basket:gameBasket,pos:gamePos,sort:gameSort})[g.id]();
+    gb.appendChild(b);
+  });
+  el.querySelector(".brand .icon-btn").onclick=settings;
+  screen(el);
+}
+
+function settings(){
+  const sh=$(`<div class="sheet"><div class="box">
+    <h2>Настройки</h2>
+    <div class="opt">Показывать слова (для читающих)<button class="toggle" data-k="showWords"></button></div>
+    <div class="opt">Озвучка слов и похвалы<button class="toggle" data-k="voice"></button></div>
+    <div class="opt">Звуковые эффекты<button class="toggle" data-k="sfx"></button></div>
+    <div class="opt">Заданий в игре<div class="chips">${[5,10,15,20].map(n=>`<button class="chip" data-n="${n}">${n}</button>`).join("")}</div></div>
+    <p class="hint">В играх «Назови картинку» и «Собери корзинку» правильность произношения отмечает взрослый — кнопкой ✓ или «Ещё раз».</p>
+    <button class="btn primary">Готово</button>
+  </div></div>`);
+  const paint=()=>{
+    sh.querySelectorAll(".toggle").forEach(t=>t.classList.toggle("on",!!S[t.dataset.k]));
+    sh.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",+c.dataset.n===S.rounds));
+  };
+  sh.querySelectorAll(".toggle").forEach(t=>t.onclick=()=>{S[t.dataset.k]=!S[t.dataset.k];save();paint()});
+  sh.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{S.rounds=+c.dataset.n;save();paint()});
+  sh.querySelector(".btn").onclick=()=>sh.remove();
+  sh.onclick=e=>{if(e.target===sh)sh.remove()};
+  paint(); document.body.appendChild(sh);
+}
+
+function deck(list,n){let out=[];while(out.length<n)out=out.concat(shuffle(list));return out.slice(0,n)}
+
+function finish(stars,total,again){
+  const el=$(`<div class="finish">
+    <div class="big pop">${stars>=total*.8?"🏆":stars>=total*.5?"🌟":"👏"}</div>
+    <h2>${praise()}</h2>
+    <p>Звёздочек: ${stars} из ${total}</p>
+    <div class="row"><button class="btn primary">Ещё раз</button><button class="btn">В меню</button></div>
+  </div>`);
+  const [a,b]=el.querySelectorAll(".btn"); a.onclick=again; b.onclick=home;
+  screen(el); good(); say(praise()+" Ты заработал "+stars+" "+starWord(stars)); confetti();
+}
+function starWord(n){const m=n%10,h=n%100;if(m===1&&h!==11)return"звёздочку";if(m>=2&&m<=4&&(h<12||h>14))return"звёздочки";return"звёздочек"}
+function confetti(){
+  const set=["⭐","🎉","✨","🎈","💛","🌟"];
+  for(let i=0;i<28;i++){
+    const c=$(`<div class="confetti">${set[i%set.length]}</div>`);
+    c.style.left=Math.random()*100+"vw"; c.style.animationDuration=(2+Math.random()*2)+"s"; c.style.animationDelay=Math.random()*.6+"s";
+    document.body.appendChild(c); setTimeout(()=>c.remove(),5000);
+  }
+}
+
+/* ---------- Игра 1: Назови картинку ---------- */
+function gameName(){
+  const s=S.sound, items=deck(WORDS[s],S.rounds);
+  let i=0, stars=0, speed=store.get("speed",0), timer=null;
+  const SPEEDS=[["Сам",0],["Медленно",7000],["Средне",4500],["Быстро",2500]];
+  const ph=progressHeader();
+  const stage=$(`<div class="stage">
+    <div class="chips">${SPEEDS.map(([t,v])=>`<button class="chip" data-v="${v}">${t}</button>`).join("")}</div>
+    <div class="card"><div class="pic"></div><div class="word"></div></div>
+    <div class="timer" style="visibility:hidden"><i></i></div>
+    <div class="row"><button class="btn blue">🔊 Послушать</button><button class="btn">🔁 Ещё раз</button><button class="btn good">✓ Сказал верно</button></div>
+  </div>`);
+  const wrap=$(`<div style="display:flex;flex-direction:column;flex:1;min-height:0"></div>`); wrap.append(ph.el,stage);
+  const card=stage.querySelector(".card"), bar=stage.querySelector(".timer"), barI=bar.querySelector("i");
+  const [bListen,bAgain,bOk]=stage.querySelectorAll(".row .btn");
+  function paintSpeed(){stage.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",+c.dataset.v===speed))}
+  stage.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{speed=+c.dataset.v;store.set("speed",speed);paintSpeed();show()});
+  function show(){
+    clearTimeout(timer);
+    if(i>=items.length)return finish(stars,items.length,gameName);
+    const [w,e]=items[i];
+    card.querySelector(".pic").textContent=e;
+    const wd=card.querySelector(".word"); wd.innerHTML=hl(w,s); wd.classList.toggle("hidden",!S.showWords);
+    card.classList.remove("pop"); void card.offsetWidth; card.classList.add("pop");
+    ph.set(i,items.length,stars);
+    bar.style.visibility=speed?"visible":"hidden";
+    if(speed){
+      barI.style.transition="none";barI.style.width="100%";void barI.offsetWidth;
+      barI.style.transition=`width ${speed}ms linear`;barI.style.width="0%";
+      timer=setTimeout(()=>{stars++;i++;good();show()},speed);
+    }
+  }
+  bListen.onclick=()=>say(items[i][0]);
+  bAgain.onclick=()=>{say("Попробуй ещё раз: "+items[i][0]);card.classList.remove("shake");void card.offsetWidth;card.classList.add("shake");if(speed)show()};
+  bOk.onclick=()=>{stars++;i++;good();show()};
+  cleanup=()=>clearTimeout(timer);
+  screen(wrap); paintSpeed(); show();
+}
+
+/* ---------- Игра 2: Собери корзинку ---------- */
+function gameBasket(){
+  const s=S.sound;
+  const targets=shuffle(WORDS[s]).slice(0,6);
+  const fill=shuffle(FILLERS.filter(([w])=>!has(w,s))).slice(0,3);
+  const all=shuffle(targets.concat(fill));
+  let got=0, stars=0, mistakes=0;
+  const head=header("Собери корзинку");
+  const stage=$(`<div class="stage">
+    <p class="hint" style="font-size:19px;margin:0">Назови предмет и положи в корзину, если в слове есть звук <b>${s}</b></p>
+    <div class="field"></div>
+    <div class="basket"><span class="bk">🧺</span></div>
+  </div>`);
+  const wrap=$(`<div style="display:flex;flex-direction:column;flex:1;min-height:0"></div>`); wrap.append(head,stage);
+  const field=stage.querySelector(".field"), basket=stage.querySelector(".basket");
+  const starEl=head.querySelector(".stars span");
+  say("Положи в корзинку всё, где есть звук "+s);
+  all.forEach(([w,e])=>{
+    const it=$(`<div class="item">${e}${S.showWords?`<small>${w}</small>`:""}</div>`);
+    field.appendChild(it);
+    let sx,sy,ghost=null,moved=false;
+    it.addEventListener("pointerdown",ev=>{
+      if(it.classList.contains("gone"))return;
+      sx=ev.clientX;sy=ev.clientY;moved=false;it.setPointerCapture(ev.pointerId);
+    });
+    it.addEventListener("pointermove",ev=>{
+      if(sx==null)return;
+      const dx=ev.clientX-sx,dy=ev.clientY-sy;
+      if(!ghost&&Math.hypot(dx,dy)>12){
+        moved=true; const r=it.getBoundingClientRect();
+        ghost=it.cloneNode(true);ghost.classList.add("drag");
+        ghost.style.width=r.width+"px";ghost.style.height=r.height+"px";ghost.style.left=r.left+"px";ghost.style.top=r.top+"px";
+        ghost._ox=r.left;ghost._oy=r.top;document.body.appendChild(ghost);it.style.opacity=".3";
+      }
+      if(ghost){
+        ghost.style.left=(ghost._ox+dx)+"px";ghost.style.top=(ghost._oy+dy)+"px";
+        basket.classList.toggle("hot",over(ev));
+      }
+    });
+    const over=ev=>{const b=basket.getBoundingClientRect();return ev.clientX>b.left&&ev.clientX<b.right&&ev.clientY>b.top-30&&ev.clientY<b.bottom};
+    it.addEventListener("pointerup",ev=>{
+      const dropped=ghost?over(ev):false;
+      if(ghost){ghost.remove();ghost=null}
+      it.style.opacity="";basket.classList.remove("hot");sx=null;
+      if(!moved){say(w);return}          // тап — просто озвучить слово
+      if(dropped)tryPut(it,w,e);
+    });
+    it.addEventListener("pointercancel",()=>{if(ghost){ghost.remove();ghost=null}it.style.opacity="";sx=null});
+  });
+  function tryPut(it,w,e){
+    if(has(w,s)){
+      it.classList.add("gone"); got++; stars++;
+      const g=$(`<span class="got pop">${e}</span>`); basket.appendChild(g);
+      good(); say(w); starEl.textContent=stars;
+      if(got===targets.length)setTimeout(()=>finish(stars,targets.length,gameBasket),900);
+    }else{
+      mistakes++; bad(); say("В слове "+w+" нет звука "+s);
+      it.classList.remove("shake");void it.offsetWidth;it.classList.add("shake");
+    }
+  }
+  screen(wrap);
+}
+
+/* ---------- Игра 3: Где живёт звук? ---------- */
+function gamePos(){
+  const s=S.sound;
+  const pool=WORDS[s].filter(([w])=>count(w,s)===1);
+  const items=deck(pool,S.rounds);
+  let i=0,stars=0,first=true,locked=false;
+  const ph=progressHeader();
+  const stage=$(`<div class="stage">
+    <div class="card"><div class="pic"></div><div class="word"></div></div>
+    <p class="hint" style="font-size:19px;margin:0">Где спрятался звук <b>${s}</b>?</p>
+    <div class="train">${POS.map((p,k)=>`<button class="wagon" data-k="${k}"><div class="sch">${[0,1,2].map(j=>`<i class="${j===k?"f":""}"></i>`).join("")}</div>${p}</button>`).join("")}</div>
+  </div>`);
+  const wrap=$(`<div style="display:flex;flex-direction:column;flex:1;min-height:0"></div>`); wrap.append(ph.el,stage);
+  const card=stage.querySelector(".card"), wagons=[...stage.querySelectorAll(".wagon")];
+  card.onclick=()=>say(items[i][0]);
+  function show(){
+    if(i>=items.length)return finish(stars,items.length,gamePos);
+    const [w,e]=items[i]; first=true; locked=false;
+    wagons.forEach(b=>b.classList.remove("ok","no"));
+    card.querySelector(".pic").textContent=e;
+    const wd=card.querySelector(".word"); wd.textContent=w; wd.classList.toggle("hidden",!S.showWords);
+    card.classList.remove("pop");void card.offsetWidth;card.classList.add("pop");
+    ph.set(i,items.length,stars); say(w);
+  }
+  wagons.forEach(b=>b.onclick=()=>{
+    if(locked)return;
+    const [w]=items[i], right=posOf(w,s), k=+b.dataset.k;
+    if(k===right){
+      locked=true; b.classList.add("ok"); if(first)stars++; good();
+      const wd=card.querySelector(".word"); wd.innerHTML=hl(w,s); wd.classList.remove("hidden");
+      say(praise()+" Звук "+s+" — в "+(["начале","середине","конце"][right])+" слова");
+      ph.set(i+1,items.length,stars);
+      setTimeout(()=>{i++;show()},1900);
+    }else{
+      first=false; b.classList.add("no"); bad(); setTimeout(()=>b.classList.remove("no"),600);
+      say("Послушай ещё раз: "+w);
+    }
+  });
+  screen(wrap); show();
+}
+
+/* ---------- Игра 4: Чей домик? (дифференциация) ---------- */
+function gameSort(){
+  const [a,b]=PAIRS[S.sound];
+  const pa=WORDS[a].filter(([w])=>has(w,a)&&!has(w,b)).map(x=>[...x,a]);
+  const pb=WORDS[b].filter(([w])=>has(w,b)&&!has(w,a)).map(x=>[...x,b]);
+  const half=Math.ceil(S.rounds/2);
+  const items=shuffle(deck(pa,half).concat(deck(pb,S.rounds-half)));
+  let i=0,stars=0,first=true,locked=false;
+  const ph=progressHeader();
+  const stage=$(`<div class="stage">
+    <div class="card"><div class="pic"></div><div class="word"></div></div>
+    <p class="hint" style="font-size:19px;margin:0">Назови картинку. В каком домике она живёт?</p>
+    <div class="houses">
+      <button class="house" data-s="${a}" style="background:var(--sky);color:var(--accent2)">${a}</button>
+      <button class="house" data-s="${b}" style="background:var(--peach);color:var(--accent)">${b}</button>
+    </div>
+  </div>`);
+  const wrap=$(`<div style="display:flex;flex-direction:column;flex:1;min-height:0"></div>`); wrap.append(ph.el,stage);
+  const card=stage.querySelector(".card"), houses=[...stage.querySelectorAll(".house")];
+  card.onclick=()=>say(items[i][0]);
+  say("Звук "+a+" или звук "+b+"?");
+  function show(){
+    if(i>=items.length)return finish(stars,items.length,gameSort);
+    const [w,e]=items[i]; first=true; locked=false;
+    houses.forEach(h=>h.classList.remove("ok","no"));
+    card.querySelector(".pic").textContent=e;
+    const wd=card.querySelector(".word"); wd.textContent=w; wd.classList.toggle("hidden",!S.showWords);
+    card.classList.remove("pop");void card.offsetWidth;card.classList.add("pop");
+    ph.set(i,items.length,stars);
+  }
+  houses.forEach(h=>h.onclick=()=>{
+    if(locked)return;
+    const [w,,snd]=items[i];
+    if(h.dataset.s===snd){
+      locked=true; h.classList.add("ok"); if(first)stars++; good();
+      const wd=card.querySelector(".word"); wd.innerHTML=hl(w,snd); wd.classList.remove("hidden");
+      say(praise()+" В слове "+w+" звук "+snd);
+      ph.set(i+1,items.length,stars);
+      setTimeout(()=>{i++;show()},1700);
+    }else{
+      first=false; h.classList.add("no"); bad(); setTimeout(()=>h.classList.remove("no"),600);
+      say("Послушай: "+w);
+    }
+  });
+  screen(wrap); show();
+}
+
+home();
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
+</script>
+</body>
+</html>
